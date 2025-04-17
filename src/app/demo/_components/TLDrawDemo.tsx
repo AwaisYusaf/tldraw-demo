@@ -103,6 +103,7 @@ export default function CustomShapeExample() {
   return (
     <div style={{ position: "fixed", inset: 0, width: "100%", height: "100%" }}>
       <Tldraw
+        persistenceKey="tldraw-demo-custom-shape"
         shapeUtils={customShape}
         onMount={(editor) => {
           let x = 0;

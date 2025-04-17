@@ -1,9 +1,10 @@
 import React from "react";
+import TLDrawDemo from "./_components/TLDrawDemo";
 
 type Props = {};
 
 function Page({}: Props) {
-  return <div>Page</div>;
+  return <TLDrawDemo />;
 }
 
 export default Page;

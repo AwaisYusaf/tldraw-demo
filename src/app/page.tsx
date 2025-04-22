@@ -9,6 +9,10 @@ export default function Home() {
         <Link href="/demo">
           <Button>View Demo</Button>
         </Link>
+
+        <Link href="/demo2">
+          <Button>View Demo 2</Button>
+        </Link>
       </div>
     </div>
   );

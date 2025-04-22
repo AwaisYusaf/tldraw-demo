@@ -1,10 +1,18 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 export default function WireframeShape({ data }: { data: any }) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const { wireframe } = data;
 
   const mobileView = false;
+
+  const [isEditing, setIsEditing] = useState(false);
 
   const handleIframeLoad = () => {
     const iframeElement = iframeRef.current;
@@ -38,42 +46,54 @@ export default function WireframeShape({ data }: { data: any }) {
         width: data.dimensions.width,
         height: data.dimensions.height,
       }}
+      onDoubleClick={() => setIsEditing(true)}
       className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-stone-200"
     >
-      <div className="flex flex-col items-center relative">
-        <div>
-          <h2>{data.title}</h2>
-        </div>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <div className="flex flex-col items-center relative">
+              <div>
+                <h2>{data.title}</h2>
+              </div>
 
-        {wireframe && (
-          <iframe
-            title={`wireframe-${data.title}`}
-            srcDoc={wireframe}
-            frameBorder="0"
-            ref={iframeRef}
-            onLoad={handleIframeLoad}
-            className="overflow-hidden"
-            style={{
-              height: data.dimensions.height,
-              width: data.dimensions.width,
-              overflow: "hidden",
-              zIndex: 10,
-            }}
-          />
-        )}
-
-        <div
-          className="absolute inset-0 z-20"
-          style={{
-            width: data.dimensions.width,
-            height: data.dimensions.height,
-          }}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-        />
-      </div>
+              {wireframe && (
+                <iframe
+                  title={`wireframe-${data.title}`}
+                  srcDoc={wireframe}
+                  frameBorder="0"
+                  ref={iframeRef}
+                  onLoad={handleIframeLoad}
+                  className="overflow-hidden"
+                  style={{
+                    height: data.dimensions.height,
+                    width: data.dimensions.width,
+                    overflow: "hidden",
+                    zIndex: 10,
+                  }}
+                />
+              )}
+              {!isEditing && (
+                <div
+                  className="absolute inset-0 z-20 bg-gray-100/10"
+                  style={{
+                    width: data.dimensions.width,
+                    height: data.dimensions.height,
+                  }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onDoubleClick={() => setIsEditing(true)}
+                />
+              )}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Double click to edit</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
     </div>
   );
 }

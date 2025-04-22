@@ -15,7 +15,7 @@ import "tldraw/tldraw.css";
 import WireframeShape from "./WireframeShape";
 import { WIREFRAMES } from "../_constants/wireframes.constant";
 import GroupAllWireframes from "./GroupAllWireframes";
-
+import WireframeAIEditor from "./WireframeAIEditor";
 type ICustomShape = TLBaseShape<
   "my-custom-wireframe",
   {
@@ -127,6 +127,7 @@ export default function CustomShapeExample() {
         }}
       >
         <GroupAllWireframes />
+        <WireframeAIEditor />
       </Tldraw>
     </div>
   );

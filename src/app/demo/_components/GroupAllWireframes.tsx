@@ -115,7 +115,12 @@ function GroupAllWireframes({}: Props) {
         className="absolute top-6 left-[50%] w-full h-full  z-50"
         style={{ zIndex: 1000 }}
       >
-        <Button onClick={groupAllWireframes}>Group All Wireframes</Button>
+        <Button
+          onClick={groupAllWireframes}
+          className="bg-indigo-800 text-white"
+        >
+          Group All Wireframes
+        </Button>
       </div>
     </div>
   );

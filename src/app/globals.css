@@ -127,3 +127,7 @@
     @apply bg-background text-foreground;
   }
 }
+
+.no-resize {
+  resize: none;
+}

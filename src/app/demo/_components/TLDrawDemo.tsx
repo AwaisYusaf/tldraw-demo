@@ -14,6 +14,7 @@ import {
 import "tldraw/tldraw.css";
 import WireframeShape from "./WireframeShape";
 import { WIREFRAMES } from "../_constants/wireframes.constant";
+import GroupAllWireframes from "./GroupAllWireframes";
 
 type ICustomShape = TLBaseShape<
   "my-custom-wireframe",
@@ -79,7 +80,6 @@ export class MyShapeUtil extends ShapeUtil<ICustomShape> {
 
   // [f]
   component(shape: ICustomShape) {
-    console.log("Component", shape);
     return (
       <HTMLContainer style={{ pointerEvents: "auto" }}>
         <WireframeShape data={shape.props} />
@@ -103,12 +103,12 @@ export default function CustomShapeExample() {
   return (
     <div style={{ position: "fixed", inset: 0, width: "100%", height: "100%" }}>
       <Tldraw
-        persistenceKey="tldraw-demo-custom-shape"
         shapeUtils={customShape}
         onMount={(editor) => {
           let x = 0;
-          WIREFRAMES.map((w) => {
-            editor.createShape({
+          const shapeIds: string[] = [];
+          WIREFRAMES.slice(0, 4).map((w) => {
+            const shape = editor.createShape({
               type: "my-custom-wireframe",
               x: x,
               y: 100,
@@ -121,10 +121,13 @@ export default function CustomShapeExample() {
                 wireframe: w._html,
               },
             });
+            shapeIds.push(shape.id);
             x += w.dimensions.width + 30;
           });
         }}
-      />
+      >
+        <GroupAllWireframes />
+      </Tldraw>
     </div>
   );
 }

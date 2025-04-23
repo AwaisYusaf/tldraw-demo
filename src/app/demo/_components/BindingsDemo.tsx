@@ -99,17 +99,22 @@ class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
 
 // The element shapes that can be placed inside the container shapes
 
-type ElementShape = TLBaseShape<"element", { color: string }>;
+type ElementShape = TLBaseShape<
+  "element",
+  { color: string; isInteractive: boolean }
+>;
 
 class ElementShapeUtil extends ShapeUtil<ElementShape> {
   static override type = "element" as const;
   static override props: RecordProps<ElementShape> = {
     color: T.string,
+    isInteractive: T.boolean,
   };
 
   override getDefaultProps() {
     return {
       color: "#AEC6CF",
+      isInteractive: false,
     };
   }
 
@@ -149,6 +154,25 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
     });
   }
 
+  // override canSelect(shape: ElementShape) {
+  //   return !shape.props.isInteractive;
+  // }
+
+  onDoubleClick = (shape: ElementShape) => {
+    const editor = this.editor;
+
+    if (!shape.props.isInteractive) {
+      // If becoming interactive, deselect the shape first
+      editor.setSelectedShapes([]);
+    }
+
+    editor.updateShape({
+      id: shape.id,
+      type: "element",
+      props: { ...shape.props, isInteractive: !shape.props.isInteractive },
+    });
+  };
+
   override component(shape: ElementShape) {
     const wireframe = WIREFRAMES[0];
     const editor = useEditor();
@@ -168,7 +192,9 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
     const size = baseSize / currZoomLevel;
 
     return (
-      <HTMLContainer className="bg-red-500">
+      <HTMLContainer
+        style={{ pointerEvents: shape.props.isInteractive ? "all" : "none" }}
+      >
         <header className="bg-white mb-4 p-3 rounded flex items-center justify-between">
           <div className="flex items-center space-x-2" style={{ height: size }}>
             <File
@@ -183,6 +209,7 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
           style={{
             width: wireframe.dimensions.width,
             height: wireframe.dimensions.height,
+            pointerEvents: shape.props.isInteractive ? "all" : "none",
           }}
           className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-stone-200"
         >
@@ -202,22 +229,10 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
                   width: wireframe.dimensions.width,
                   overflow: "hidden",
                   zIndex: 10,
+                  pointerEvents: shape.props.isInteractive ? "all" : "none",
                 }}
               />
             )}
-
-            {/* <div
-              className="absolute inset-0 z-20"
-              style={{
-                width: wireframe.dimensions.width,
-                height: wireframe.dimensions.height,
-                marginTop: size,
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            /> */}
           </div>
         </div>
       </HTMLContainer>
@@ -501,7 +516,7 @@ class LayoutBindingUtil extends BindingUtil<LayoutBinding> {
 
 export default function BindingsDemo() {
   return (
-    <div className="fixed inset-0 w-full h-full">
+    <div className="fixed inset-0 w-full h-full z-50">
       <Tldraw
         // @ts-ignore
         snapshot={snapShot}

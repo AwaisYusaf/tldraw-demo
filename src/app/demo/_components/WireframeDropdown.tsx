@@ -21,9 +21,9 @@ function WireframeDropdown() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">
-          <Menu />
-        </Button>
+        <button className="p-2 rounded-md hover:bg-gray-100 shadow">
+          <Menu className="size-4" />
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56 mr-44">
         <DropdownMenuItem>

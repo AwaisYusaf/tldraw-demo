@@ -13,18 +13,20 @@ import {
   T,
   TLBaseBinding,
   TLBaseShape,
+  TLEditorComponents,
   Tldraw,
   Vec,
   clamp,
   createBindingId,
   getIndexBetween,
   useEditor,
+  useIsEditing,
 } from "tldraw";
 import "tldraw/tldraw.css";
 import snapShot from "./snapshot.json";
 import { WIREFRAMES } from "../_constants/wireframes.constant";
-import { File } from "lucide-react";
-import WireframeDropdown from "./WireframeDropdown";
+import WireframeContextToolbar from "./WireframeContextToolbar";
+import { Button } from "@/components/ui/button";
 const CONTAINER_PADDING = 24;
 
 type ContainerShape = TLBaseShape<"element", { height: number; width: number }>;
@@ -158,22 +160,23 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
   //   return !shape.props.isInteractive;
   // }
 
-  onDoubleClick = (shape: ElementShape) => {
-    const editor = this.editor;
+  // onDoubleClick = (shape: ElementShape) => {
+  //   const editor = this.editor;
 
-    if (!shape.props.isInteractive) {
-      // If becoming interactive, deselect the shape first
-      editor.setSelectedShapes([]);
-    }
+  //   if (!shape.props.isInteractive) {
+  //     // If becoming interactive, deselect the shape first
+  //     editor.setSelectedShapes([]);
+  //   }
 
-    editor.updateShape({
-      id: shape.id,
-      type: "element",
-      props: { ...shape.props, isInteractive: !shape.props.isInteractive },
-    });
-  };
+  //   editor.updateShape({
+  //     id: shape.id,
+  //     type: "element",
+  //     props: { ...shape.props, isInteractive: !shape.props.isInteractive },
+  //   });
+  // };
 
   override component(shape: ElementShape) {
+    const isEditing = useIsEditing(shape.id);
     const wireframe = WIREFRAMES[0];
     const editor = useEditor();
 
@@ -189,27 +192,14 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
     if (currZoomLevel < 0.5) {
       baseSize = 10;
     }
-    const size = baseSize / currZoomLevel;
 
     return (
-      <HTMLContainer
-        style={{ pointerEvents: shape.props.isInteractive ? "all" : "none" }}
-      >
-        <header className="bg-white mb-4 p-3 rounded flex items-center justify-between">
-          <div className="flex items-center space-x-2" style={{ height: size }}>
-            <File
-              className="size-4 text-gray-600"
-              style={{ height: size, width: size }}
-            />
-            <h2 style={{ fontSize: size }}>Screen 1</h2>
-          </div>
-          <WireframeDropdown />
-        </header>
+      <HTMLContainer style={{ pointerEvents: isEditing ? "all" : "none" }}>
         <div
           style={{
             width: wireframe.dimensions.width,
             height: wireframe.dimensions.height,
-            pointerEvents: shape.props.isInteractive ? "all" : "none",
+            pointerEvents: isEditing ? "all" : "none",
           }}
           className="px-4 py-2 shadow-md rounded-md bg-white border-2 border-stone-200"
         >
@@ -225,14 +215,43 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
                 frameBorder="0"
                 className="overflow-hidden"
                 style={{
+                  pointerEvents: isEditing ? "all" : "none",
                   height: wireframe.dimensions.height,
                   width: wireframe.dimensions.width,
                   overflow: "hidden",
                   zIndex: 10,
-                  pointerEvents: shape.props.isInteractive ? "all" : "none",
                 }}
               />
             )}
+
+            <div
+              style={{
+                textAlign: "center",
+                position: "absolute",
+                bottom: isEditing ? -40 : 30,
+                padding: 4,
+                fontFamily: "inherit",
+                fontSize: 12,
+                left: 0,
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                pointerEvents: "none",
+                zIndex: 100,
+              }}
+            >
+              <Button
+                style={{
+                  padding: "4px 12px",
+                  border: "1px solid var(--color-muted-1)",
+                }}
+              >
+                {isEditing
+                  ? "Click Outside to Exit"
+                  : "Double Click for Interactive Mode"}
+              </Button>
+            </div>
           </div>
         </div>
       </HTMLContainer>
@@ -515,6 +534,9 @@ class LayoutBindingUtil extends BindingUtil<LayoutBinding> {
 }
 
 export default function BindingsDemo() {
+  const components: TLEditorComponents = {
+    InFrontOfTheCanvas: WireframeContextToolbar,
+  };
   return (
     <div className="fixed inset-0 w-full h-full z-50">
       <Tldraw
@@ -523,8 +545,10 @@ export default function BindingsDemo() {
         onMount={(editor) => {
           (window as any).editor = editor;
         }}
+        hideUi
         shapeUtils={[ContainerShapeUtil, ElementShapeUtil]}
         bindingUtils={[LayoutBindingUtil]}
+        components={components}
       />
     </div>
   );

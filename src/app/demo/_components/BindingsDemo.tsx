@@ -58,11 +58,12 @@ class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
       bindingType === "layout"
     );
   }
+
   override canEdit() {
-    return false;
+    return true;
   }
   override canResize() {
-    return false;
+    return true;
   }
   override hideRotateHandle() {
     return true;
@@ -83,7 +84,7 @@ class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
     return (
       <HTMLContainer
         style={{
-          backgroundColor: "#efefef",
+          backgroundColor: "lightgray",
           width: shape.props.width,
           height: shape.props.height,
         }}
@@ -128,10 +129,10 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
     );
   }
   override canEdit() {
-    return false;
+    return true;
   }
   override canResize() {
-    return false;
+    return true;
   }
   override hideRotateHandle() {
     return true;
@@ -167,7 +168,7 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
     const size = baseSize / currZoomLevel;
 
     return (
-      <HTMLContainer>
+      <HTMLContainer className="bg-red-500">
         <header className="bg-white mb-4 p-3 rounded flex items-center justify-between">
           <div className="flex items-center space-x-2" style={{ height: size }}>
             <File

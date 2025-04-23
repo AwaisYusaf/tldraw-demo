@@ -18,10 +18,13 @@ import {
   clamp,
   createBindingId,
   getIndexBetween,
+  useEditor,
 } from "tldraw";
 import "tldraw/tldraw.css";
 import snapShot from "./snapshot.json";
 import { WIREFRAMES } from "../_constants/wireframes.constant";
+import { File } from "lucide-react";
+import WireframeDropdown from "./WireframeDropdown";
 const CONTAINER_PADDING = 24;
 
 type ContainerShape = TLBaseShape<"element", { height: number; width: number }>;
@@ -147,8 +150,34 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
 
   override component(shape: ElementShape) {
     const wireframe = WIREFRAMES[0];
+    const editor = useEditor();
+
+    const currZoomLevel = editor.getZoomLevel();
+    let baseSize = 30;
+
+    if (currZoomLevel > 1) {
+      baseSize = 20;
+    }
+    if (currZoomLevel < 1 && currZoomLevel > 0.5) {
+      baseSize = 15;
+    }
+    if (currZoomLevel < 0.5) {
+      baseSize = 10;
+    }
+    const size = baseSize / currZoomLevel;
+
     return (
-      <HTMLContainer style={{ backgroundColor: shape.props.color }}>
+      <HTMLContainer>
+        <header className="bg-white mb-4 p-3 rounded flex items-center justify-between">
+          <div className="flex items-center space-x-2" style={{ height: size }}>
+            <File
+              className="size-4 text-gray-600"
+              style={{ height: size, width: size }}
+            />
+            <h2 style={{ fontSize: size }}>Screen 1</h2>
+          </div>
+          <WireframeDropdown />
+        </header>
         <div
           style={{
             width: wireframe.dimensions.width,
@@ -166,8 +195,6 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
                 title={`wireframe-${wireframe.title}`}
                 srcDoc={wireframe._html}
                 frameBorder="0"
-                // ref={iframeRef}
-                // onLoad={handleIframeLoad}
                 className="overflow-hidden"
                 style={{
                   height: wireframe.dimensions.height,
@@ -178,17 +205,18 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
               />
             )}
 
-            <div
+            {/* <div
               className="absolute inset-0 z-20"
               style={{
                 width: wireframe.dimensions.width,
                 height: wireframe.dimensions.height,
+                marginTop: size,
               }}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-            />
+            /> */}
           </div>
         </div>
       </HTMLContainer>

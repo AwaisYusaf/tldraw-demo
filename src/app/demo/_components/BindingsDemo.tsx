@@ -13,6 +13,7 @@ import {
   T,
   TLBaseBinding,
   TLBaseShape,
+  TLComponents,
   TLEditorComponents,
   Tldraw,
   Vec,
@@ -535,7 +536,7 @@ class LayoutBindingUtil extends BindingUtil<LayoutBinding> {
 }
 
 export default function BindingsDemo() {
-  const components = {
+  const components: TLComponents = {
     InFrontOfTheCanvas: WireframeContextToolbar,
     ContextMenu: CustomContextMenu,
   };

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   DefaultContextMenu,
   DefaultContextMenuContent,
@@ -12,78 +12,102 @@ import "tldraw/tldraw.css";
 // Save, Show Code, Prompt History, Change Font, Export, Move, Delete forever
 export function CustomContextMenu(props: TLUiContextMenuProps) {
   const editor = useEditor();
+  const [showCustomMenu, setShowCustomMenu] = useState(false);
 
-  console.log("Props:", props);
+  useEffect(() => {
+    editor.on("event", (e) => {
+      // console.log(
+      //   "editor.getOnlySelectedShape()",
+      //   editor.getOnlySelectedShape()
+      // );
+      if (e.name === "right_click" && editor.getOnlySelectedShape()) {
+        if (!showCustomMenu) {
+          setShowCustomMenu(true);
+        }
+      } else {
+        if (showCustomMenu) {
+          setShowCustomMenu(false);
+        }
+      }
+    });
+  }, [editor]);
 
   return (
     <DefaultContextMenu {...props}>
-      {editor.getSelectedShapes().length > 0 &&
-      editor.getSelectedShapes()[0].type == "element" ? (
-        <TldrawUiMenuGroup id="example">
-          <TldrawUiMenuItem
-            id="like"
-            label="Save"
-            icon="external-link"
-            readonlyOk
-            onSelect={() => {
-              console.log("Clicked...");
-            }}
-          />
-          <TldrawUiMenuItem
-            id="like"
-            label="Show Code"
-            icon="external-link"
-            readonlyOk
-            onSelect={() => {
-              console.log("Clicked...");
-            }}
-          />
-          <TldrawUiMenuItem
-            id="like"
-            label="Prompt History"
-            icon="external-link"
-            readonlyOk
-            onSelect={() => {
-              console.log("Clicked...");
-            }}
-          />
-          <TldrawUiMenuItem
-            id="like"
-            label="Change Font"
-            icon="external-link"
-            readonlyOk
-            onSelect={() => {
-              console.log("Clicked...");
-            }}
-          />
-          <TldrawUiMenuItem
-            id="like"
-            label="Export"
-            icon="external-link"
-            readonlyOk
-            onSelect={() => {
-              console.log("Clicked...");
-            }}
-          />
-          <TldrawUiMenuItem
-            id="like"
-            label="Move"
-            icon="external-link"
-            readonlyOk
-            onSelect={() => {
-              console.log("Clicked...");
-            }}
-          />
-          <TldrawUiMenuItem
-            id="like"
-            label="Delete forever"
-            icon="external-link"
-            readonlyOk
-            onSelect={() => {
-              console.log("Clicked...");
-            }}
-          />
-        </TldrawUiMenuGroup>
+      {showCustomMenu ? (
+        <>
+          <TldrawUiMenuGroup id="actions">
+            <TldrawUiMenuItem
+              id="save"
+              label="Save"
+              icon="save"
+              readonlyOk
+              onSelect={() => {
+                console.log("Save clicked");
+              }}
+            />
+            <TldrawUiMenuItem
+              id="show-code"
+              label="Show Code"
+              icon="code"
+              readonlyOk
+              onSelect={() => {
+                console.log("Show code clicked");
+              }}
+            />
+            <TldrawUiMenuItem
+              id="prompt-history"
+              label="Prompt History"
+              icon="chat"
+              readonlyOk
+              onSelect={() => {
+                console.log("Prompt history clicked");
+              }}
+            />
+          </TldrawUiMenuGroup>
+
+          <TldrawUiMenuGroup id="customize">
+            <TldrawUiMenuItem
+              id="change-font"
+              label="Change Font"
+              icon="text"
+              readonlyOk
+              onSelect={() => {
+                console.log("Change font clicked");
+              }}
+            />
+            <TldrawUiMenuItem
+              id="export"
+              label="Export"
+              icon="export"
+              readonlyOk
+              onSelect={() => {
+                console.log("Export clicked");
+              }}
+            />
+          </TldrawUiMenuGroup>
+
+          <TldrawUiMenuGroup id="danger">
+            <TldrawUiMenuItem
+              id="move"
+              label="Move"
+              icon="move"
+              readonlyOk
+              onSelect={() => {
+                console.log("Move clicked");
+              }}
+            />
+            <TldrawUiMenuItem
+              id="delete"
+              label="Delete forever"
+              icon="trash"
+              readonlyOk
+              onSelect={() => {
+                console.log("Delete clicked");
+              }}
+            />
+          </TldrawUiMenuGroup>
+        </>
       ) : (
         <DefaultContextMenuContent />
       )}

@@ -7,10 +7,8 @@ const WireframeContextToolbar = track(() => {
   const editor = useEditor();
   const showToolbar =
     editor.isIn("select.idle") || editor.getSelectedShapeIds().length > 0;
-  console.log("ShowToolbar", showToolbar);
   if (!showToolbar) return null;
   const selectionRotatedPageBounds = editor.getSelectionRotatedPageBounds();
-  console.log("selectionRotatedPageBounds", selectionRotatedPageBounds);
   if (!selectionRotatedPageBounds) return null;
 
   const pageCoordinates = editor.pageToViewport(

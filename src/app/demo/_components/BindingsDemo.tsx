@@ -27,6 +27,7 @@ import snapShot from "./snapshot.json";
 import { WIREFRAMES } from "../_constants/wireframes.constant";
 import WireframeContextToolbar from "./WireframeContextToolbar";
 import { Button } from "@/components/ui/button";
+import { CustomContextMenu } from "./CustomContextMenu";
 const CONTAINER_PADDING = 24;
 
 type ContainerShape = TLBaseShape<"element", { height: number; width: number }>;
@@ -534,8 +535,9 @@ class LayoutBindingUtil extends BindingUtil<LayoutBinding> {
 }
 
 export default function BindingsDemo() {
-  const components: TLEditorComponents = {
+  const components = {
     InFrontOfTheCanvas: WireframeContextToolbar,
+    ContextMenu: CustomContextMenu,
   };
   return (
     <div className="fixed inset-0 w-full h-full z-50">
@@ -545,10 +547,14 @@ export default function BindingsDemo() {
         onMount={(editor) => {
           (window as any).editor = editor;
         }}
+        onUiEvent={(event) => {
+          console.log("EVENT", event);
+        }}
         hideUi
         shapeUtils={[ContainerShapeUtil, ElementShapeUtil]}
         bindingUtils={[LayoutBindingUtil]}
         components={components}
+        options={{}}
       />
     </div>
   );

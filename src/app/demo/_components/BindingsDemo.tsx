@@ -14,6 +14,7 @@ import {
   TLBaseBinding,
   TLBaseShape,
   TLComponents,
+  TLShapeId,
   Tldraw,
   Vec,
   clamp,
@@ -23,26 +24,44 @@ import {
   useIsEditing,
 } from "tldraw";
 import "tldraw/tldraw.css";
-import snapShot from "./snapshot.json";
-import { WIREFRAMES } from "../_constants/wireframes.constant";
+import {
+  PAGE_GROUPS,
+  WIREFRAMES,
+  getWireframe,
+} from "../_constants/wireframes.constant";
+import { TGroup, TWireframe } from "../_constants/types";
 import WireframeContextToolbar from "./WireframeContextToolbar";
 import { Button } from "@/components/ui/button";
 import { CustomContextMenu } from "./CustomContextMenu";
 const CONTAINER_PADDING = 24;
 
-type ContainerShape = TLBaseShape<"element", { height: number; width: number }>;
+type ContainerShape = TLBaseShape<
+  "container",
+  {
+    height: number;
+    width: number;
+    groupId: string;
+    title: string;
+  }
+>;
 
 class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
   static override type = "container" as const;
   static override props: RecordProps<ContainerShape> = {
     height: T.number,
     width: T.number,
+    groupId: T.string,
+    title: T.string,
   };
 
   override getDefaultProps() {
+    // Calculate initial size to fit at least one wireframe
+    const wireframe = WIREFRAMES[0];
     return {
-      width: WIREFRAMES[0].dimensions.width + CONTAINER_PADDING * 2,
-      height: WIREFRAMES[0].dimensions.height + CONTAINER_PADDING * 2,
+      width: wireframe.dimensions.width + CONTAINER_PADDING * 2,
+      height: wireframe.dimensions.height + CONTAINER_PADDING * 2,
+      groupId: "",
+      title: "",
     };
   }
 
@@ -85,13 +104,33 @@ class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
 
   override component(shape: ContainerShape) {
     return (
-      <HTMLContainer
-        style={{
-          backgroundColor: "lightgray",
-          width: shape.props.width,
-          height: shape.props.height,
-        }}
-      />
+      <HTMLContainer>
+        <div
+          style={{
+            backgroundColor: "#f0f0f0",
+            width: shape.props.width,
+            height: shape.props.height,
+            position: "relative",
+            borderRadius: "8px",
+            border: "2px dashed #ccc",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: -30,
+              left: 0,
+              padding: "4px 8px",
+              backgroundColor: "#fff",
+              borderRadius: "4px",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+              fontWeight: "bold",
+            }}
+          >
+            {shape.props.title}
+          </div>
+        </div>
+      </HTMLContainer>
     );
   }
 
@@ -102,20 +141,41 @@ class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
 
 type ElementShape = TLBaseShape<
   "element",
-  { color: string; isInteractive: boolean }
+  {
+    wireframeId: string;
+    title: string;
+    type: string;
+    dimensions: {
+      width: number;
+      height: number;
+    };
+    _html: string;
+  }
 >;
 
 class ElementShapeUtil extends ShapeUtil<ElementShape> {
   static override type = "element" as const;
   static override props: RecordProps<ElementShape> = {
-    color: T.string,
-    isInteractive: T.boolean,
+    wireframeId: T.string,
+    title: T.string,
+    type: T.string,
+    dimensions: T.object({
+      width: T.number,
+      height: T.number,
+    }),
+    _html: T.string,
   };
 
-  override getDefaultProps() {
+  override getDefaultProps(): ElementShape["props"] {
     return {
-      color: "#AEC6CF",
-      isInteractive: false,
+      wireframeId: "",
+      title: "",
+      type: "desktop",
+      dimensions: {
+        width: WIREFRAMES[0].dimensions.width,
+        height: WIREFRAMES[0].dimensions.height,
+      },
+      _html: WIREFRAMES[0]._html,
     };
   }
 
@@ -359,8 +419,8 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
       this.editor.createBinding<LayoutBinding>({
         id: createBindingId(),
         type: "layout",
-        fromId: targetContainer.id,
-        toId: shape.id,
+        fromId: targetContainer.id as unknown as TLShapeId,
+        toId: shape.id as unknown as TLShapeId,
         props: {
           index,
           placeholder: true,
@@ -381,24 +441,21 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
     // No target container? no problem
     if (!targetContainer) return;
 
-    // get the index for the new binding
     const index = this.getBindingIndexForPosition(
       shape,
       targetContainer,
       pageAnchor
     );
 
-    // delete all the previous bindings for this shape
     this.editor.deleteBindings(
       this.editor.getBindingsToShape<LayoutBinding>(shape, "layout")
     );
 
-    // ...and then create a new one
     this.editor.createBinding<LayoutBinding>({
       id: createBindingId(),
       type: "layout",
-      fromId: targetContainer.id,
-      toId: shape.id,
+      fromId: targetContainer.id as unknown as TLShapeId,
+      toId: shape.id as unknown as TLShapeId,
       props: {
         index,
         placeholder: false,
@@ -406,8 +463,6 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
     });
   }
 }
-
-// The binding between the element shapes and the container shapes
 
 type LayoutBinding = TLBaseBinding<
   "layout",
@@ -521,13 +576,74 @@ export default function BindingsDemo() {
   return (
     <div className="fixed inset-0 w-full h-full z-50">
       <Tldraw
-        // @ts-ignore
-        snapshot={snapShot}
         onMount={(editor) => {
+          // Create containers for each group
+          PAGE_GROUPS.forEach((group) => {
+            // Calculate container width based on number of wireframes
+            const groupWireframes = group.wireframeIds
+              .map((id) => getWireframe(id))
+              .filter((w): w is TWireframe => w !== undefined);
+
+            const containerWidth =
+              CONTAINER_PADDING + // Initial padding
+              groupWireframes.reduce((acc, wireframe) => {
+                return acc + wireframe.dimensions.width + CONTAINER_PADDING;
+              }, 0);
+
+            const maxHeight = Math.max(
+              ...groupWireframes.map((w) => w.dimensions.height)
+            );
+            const containerHeight = maxHeight + CONTAINER_PADDING * 2;
+
+            // Create container with calculated dimensions
+            const containerId = editor.createShape<ContainerShape>({
+              id: ("shape:" + group.id) as TLShapeId,
+              type: "container",
+              x: group.position.x,
+              y: group.position.y,
+              props: {
+                width: containerWidth,
+                height: containerHeight,
+                groupId: group.id,
+                title: group.title,
+              },
+            });
+
+            // Create elements for each wireframe in this group
+            groupWireframes.forEach((wireframe, index) => {
+              // Create the element shape
+              const elementId = editor.createShape<ElementShape>({
+                id: ("shape:" + wireframe.id) as TLShapeId,
+                type: "element",
+                x:
+                  group.position.x +
+                  CONTAINER_PADDING +
+                  index * (wireframe.dimensions.width + CONTAINER_PADDING),
+                y: group.position.y + CONTAINER_PADDING,
+                props: {
+                  wireframeId: wireframe.id,
+                  title: wireframe.title,
+                  type: wireframe.type,
+                  dimensions: wireframe.dimensions,
+                  _html: wireframe._html,
+                },
+              });
+
+              // Create binding between container and element
+              editor.createBinding<LayoutBinding>({
+                id: createBindingId(),
+                type: "layout",
+                fromId: containerId.id as unknown as TLShapeId,
+                toId: elementId.id as unknown as TLShapeId,
+                props: {
+                  index: `a${index}` as IndexKey,
+                  placeholder: false,
+                },
+              });
+            });
+          });
+
           (window as any).editor = editor;
-        }}
-        onUiEvent={(event) => {
-          console.log("EVENT", event);
         }}
         hideUi
         shapeUtils={[ContainerShapeUtil, ElementShapeUtil]}

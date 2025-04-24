@@ -14,7 +14,6 @@ import {
   TLBaseBinding,
   TLBaseShape,
   TLComponents,
-  TLEditorComponents,
   Tldraw,
   Vec,
   clamp,
@@ -101,8 +100,6 @@ class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
   }
 }
 
-// The element shapes that can be placed inside the container shapes
-
 type ElementShape = TLBaseShape<
   "element",
   { color: string; isInteractive: boolean }
@@ -157,25 +154,6 @@ class ElementShapeUtil extends ShapeUtil<ElementShape> {
       isFilled: true,
     });
   }
-
-  // override canSelect(shape: ElementShape) {
-  //   return !shape.props.isInteractive;
-  // }
-
-  // onDoubleClick = (shape: ElementShape) => {
-  //   const editor = this.editor;
-
-  //   if (!shape.props.isInteractive) {
-  //     // If becoming interactive, deselect the shape first
-  //     editor.setSelectedShapes([]);
-  //   }
-
-  //   editor.updateShape({
-  //     id: shape.id,
-  //     type: "element",
-  //     props: { ...shape.props, isInteractive: !shape.props.isInteractive },
-  //   });
-  // };
 
   override component(shape: ElementShape) {
     const isEditing = useIsEditing(shape.id);

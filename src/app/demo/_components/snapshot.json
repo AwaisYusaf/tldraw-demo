@@ -41,8 +41,7 @@
       "id": "shape:2oThF4kJ4v31xqKN5lvq2",
       "type": "element",
       "props": {
-        "color": "#5BCEFA",
-        "isInteractive": false
+        "color": "#5BCEFA"
       },
       "parentId": "page:page",
       "index": "a2",
@@ -58,8 +57,7 @@
       "id": "shape:K2vk_VTaNh-ANaRNOAvgY",
       "type": "element",
       "props": {
-        "color": "#F5A9B8",
-        "isInteractive": false
+        "color": "#F5A9B8"
       },
       "parentId": "page:page",
       "index": "a3",
@@ -75,8 +73,7 @@
       "id": "shape:6uouhIK7PvyIRNQHACf-d",
       "type": "element",
       "props": {
-        "color": "#FFFFFF",
-        "isInteractive": false
+        "color": "#FFFFFF"
       },
       "parentId": "page:page",
       "index": "a4",
@@ -92,8 +89,7 @@
       "id": "shape:GTQq2qxkWPHEK7KMIRtsh",
       "type": "element",
       "props": {
-        "color": "#5BCEFA",
-        "isInteractive": false
+        "color": "#5BCEFA"
       },
       "parentId": "page:page",
       "index": "a5",
@@ -109,8 +105,7 @@
       "id": "shape:05jMujN6A0sIp6zzHMpbV",
       "type": "element",
       "props": {
-        "color": "#F5A9B8",
-        "isInteractive": false
+        "color": "#F5A9B8"
       },
       "parentId": "page:page",
       "index": "a6",

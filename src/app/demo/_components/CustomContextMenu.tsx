@@ -16,6 +16,7 @@ export function CustomContextMenu(props: TLUiContextMenuProps) {
 
   useEffect(() => {
     editor.on("event", (e) => {
+      // console.log("e", e.name);
       // console.log(
       //   "editor.getOnlySelectedShape()",
       //   editor.getOnlySelectedShape()
@@ -25,9 +26,7 @@ export function CustomContextMenu(props: TLUiContextMenuProps) {
           setShowCustomMenu(true);
         }
       } else {
-        if (showCustomMenu) {
-          setShowCustomMenu(false);
-        }
+        setShowCustomMenu(false);
       }
     });
   }, [editor]);

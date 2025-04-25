@@ -2,6 +2,7 @@ import { File } from "lucide-react";
 import { track, useEditor } from "tldraw";
 import "tldraw/tldraw.css";
 import WireframeDropdown from "./WireframeDropdown";
+import { ElementShape } from "@/app/demo2/_helpers/tldraw.shapes";
 
 const WireframeContextToolbar = track(() => {
   const editor = useEditor();
@@ -15,6 +16,14 @@ const WireframeContextToolbar = track(() => {
     selectionRotatedPageBounds.point
   );
 
+  const selectedShape = editor.getOnlySelectedShape();
+  const visible = selectedShape && selectedShape.type === "element";
+  if (!visible) return null;
+
+  const width = selectedShape
+    ? (selectedShape as ElementShape).props.dimensions.width
+    : 1024;
+
   return (
     <div
       style={{
@@ -22,7 +31,7 @@ const WireframeContextToolbar = track(() => {
         pointerEvents: "all",
         top: pageCoordinates.y - 42,
         left: pageCoordinates.x,
-        width: 1024 * editor.getZoomLevel(),
+        width: width * editor.getZoomLevel(),
         display: "flex",
         justifyContent: "center",
         alignItems: "center",

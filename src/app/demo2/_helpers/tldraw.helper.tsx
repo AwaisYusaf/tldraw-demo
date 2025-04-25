@@ -41,7 +41,7 @@ export function loadElementsOnMount(editor: Editor) {
       // Create the element shape
 
       const elementId = ("shape:" + wireframe.id) as TLShapeId;
-      console.log("ElementId:", elementId);
+      // console.log("ElementId:", elementId);
       const element = editor.createShape<ElementShape>({
         id: elementId,
         type: "element",
@@ -59,7 +59,6 @@ export function loadElementsOnMount(editor: Editor) {
         },
       });
 
-      // Create binding between container and element
       editor.createBinding<LayoutBinding>({
         id: createBindingId(),
         type: "layout",

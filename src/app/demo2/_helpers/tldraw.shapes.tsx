@@ -439,6 +439,7 @@ export class ElementShapeUtil extends ShapeUtil<ElementShape> {
       this.editor.getBindingsToShape<LayoutBinding>(shape, "layout")
     );
 
+    // Create the new binding
     this.editor.createBinding<LayoutBinding>({
       id: createBindingId(),
       type: "layout",
@@ -449,6 +450,12 @@ export class ElementShapeUtil extends ShapeUtil<ElementShape> {
         placeholder: false,
       },
     });
+
+    // Bring the element to the front of its parent
+    const parentTransform = this.editor.getShapePageTransform(targetContainer);
+    if (parentTransform) {
+      this.editor.reparentShapes([shape.id], targetContainer.id);
+    }
   }
 }
 

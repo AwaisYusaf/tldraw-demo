@@ -1,18 +1,21 @@
 import { Editor, TLShapeId, createBindingId, IndexKey } from "tldraw";
-import { TWireframe } from "../_constants/types";
-import { getWireframe, PAGE_GROUPS } from "../_constants/wireframes.constant";
 import { ContainerShape, ElementShape, LayoutBinding } from "./tldraw.shapes";
+import { Group, Wireframe } from "../store/canvasSlice";
 
 const CONTAINER_PADDING = 24;
 
-export function loadElementsOnMount(editor: Editor) {
-  PAGE_GROUPS.forEach((group) => {
+export function loadElementsOnMount(
+  editor: Editor,
+  groups: Group[],
+  wireframes: Wireframe[]
+) {
+  groups.forEach((group) => {
     const groupWireframes = group.wireframeIds
-      .map((id) => getWireframe(id))
-      .filter((w): w is TWireframe => w !== undefined);
+      .map((id) => wireframes.find((w) => w.id === id))
+      .filter((w): w is Wireframe => w !== undefined);
 
     const containerWidth =
-      CONTAINER_PADDING + // Initial padding
+      CONTAINER_PADDING +
       groupWireframes.reduce((acc, wireframe) => {
         return acc + wireframe.dimensions.width + CONTAINER_PADDING;
       }, 0);
@@ -36,12 +39,8 @@ export function loadElementsOnMount(editor: Editor) {
       },
     });
 
-    // Create elements for each wireframe in this group
     groupWireframes.forEach((wireframe, index) => {
-      // Create the element shape
-
       const elementId = ("shape:" + wireframe.id) as TLShapeId;
-      // console.log("ElementId:", elementId);
       const element = editor.createShape<ElementShape>({
         id: elementId,
         type: "element",

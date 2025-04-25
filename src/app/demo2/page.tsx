@@ -1,15 +1,11 @@
 "use client";
 import React from "react";
-import BindingsDemo from "../demo/_components/BindingsDemo";
+import dynamic from "next/dynamic";
 
-type Props = {};
+const BindingsDemo = dynamic(() => import("../demo/_components/BindingsDemo"), {
+  ssr: false,
+});
 
-function Page({}: Props) {
-  return (
-    <div>
-      <BindingsDemo />
-    </div>
-  );
+export default function Demo2Page() {
+  return <BindingsDemo />;
 }
-
-export default Page;

@@ -342,7 +342,49 @@ export class ElementShapeUtil extends ShapeUtil<ElementShape> {
     } else if (aboveSib?.toId === shape.id) {
       index = aboveSib.props.index;
     } else {
-      index = getIndexBetween(belowSib?.props.index, aboveSib?.props.index);
+      try {
+        // If we have no siblings, or we're at the start/end, create simpler indices
+        if (!belowSib && !aboveSib) {
+          index = "a1" as IndexKey;
+        } else if (!belowSib) {
+          index = getIndexBetween(undefined, aboveSib.props.index);
+        } else if (!aboveSib) {
+          index = getIndexBetween(belowSib.props.index, undefined);
+        } else {
+          // If the indices are the same or in wrong order, force a reindex
+          if (belowSib.props.index >= aboveSib.props.index) {
+            // Reindex all siblings to spread them out
+            const newIndices = siblings.map((_, i) =>
+              getIndexBetween(`a${i}` as IndexKey, `a${i + 2}` as IndexKey)
+            );
+
+            // Update all bindings with new indices
+            siblings.forEach((binding, i) => {
+              this.editor.updateBinding({
+                ...binding,
+                props: {
+                  ...binding.props,
+                  index: newIndices[i],
+                },
+              });
+            });
+
+            // Use a position between the newly reindexed items
+            index = getIndexBetween(
+              newIndices[order - 1] || undefined,
+              newIndices[order] || undefined
+            );
+          } else {
+            index = getIndexBetween(belowSib.props.index, aboveSib.props.index);
+          }
+        }
+      } catch (error) {
+        // Fallback: If we still get an error, place at the end
+        const lastBinding = allBindings[allBindings.length - 1];
+        index = lastBinding
+          ? getIndexBetween(lastBinding.props.index, undefined)
+          : ("a1" as IndexKey);
+      }
     }
 
     return index;

@@ -687,6 +687,8 @@ export class LayoutBindingUtil extends BindingUtil<LayoutBinding> {
       .sort((a, b) => (a.props.index > b.props.index ? 1 : -1));
     if (bindings.length === 0) return;
 
+    console.log("Bindings:", bindings);
+
     for (let i = 0; i < bindings.length; i++) {
       const binding = bindings[i];
 
@@ -700,6 +702,8 @@ export class LayoutBindingUtil extends BindingUtil<LayoutBinding> {
           i * (shape.props.dimensions.width + CONTAINER_PADDING),
         CONTAINER_PADDING
       );
+
+      console.log("Offset:", offset);
 
       const point = this.editor.getPointInParentSpace(
         shape,
@@ -728,11 +732,7 @@ export class LayoutBindingUtil extends BindingUtil<LayoutBinding> {
       return Math.max(acc, shape.props.dimensions.height);
     }, 0);
 
-    const width =
-      CONTAINER_PADDING +
-      totalWidth +
-      (bindings.length - 1) * CONTAINER_PADDING +
-      CONTAINER_PADDING;
+    const width = totalWidth + (bindings.length + 1) * CONTAINER_PADDING;
 
     const height = CONTAINER_PADDING + maxHeight + CONTAINER_PADDING;
 

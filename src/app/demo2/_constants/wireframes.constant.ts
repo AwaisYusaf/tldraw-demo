@@ -30,7 +30,7 @@ export const PAGE_GROUPS: TGroup[] = [
     ],
     position: {
       x: 0,
-      y: 1000,
+      y: 1500,
     },
   },
 ];

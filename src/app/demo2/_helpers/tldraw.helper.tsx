@@ -9,6 +9,14 @@ export function loadElementsOnMount(
   groups: Group[],
   wireframes: Wireframe[]
 ) {
+  // Remove all container and element shapes and their bindings
+  editor.getCurrentPageShapeIds().forEach((id) => {
+    const shape = editor.getShape(id);
+    if (shape && (shape?.type === "container" || shape?.type === "element")) {
+      editor.deleteShape(id);
+    }
+  });
+
   groups.forEach((group) => {
     const groupWireframes = group.wireframeIds
       .map((id) => wireframes.find((w) => w.id === id))
@@ -40,14 +48,17 @@ export function loadElementsOnMount(
     });
 
     groupWireframes.forEach((wireframe, index) => {
+      const offsetX = index * wireframe.dimensions.width + CONTAINER_PADDING;
+      // console.log("Offset X:", offsetX);
+
       const elementId = ("shape:" + wireframe.id) as TLShapeId;
       const element = editor.createShape<ElementShape>({
         id: elementId,
         type: "element",
-        x:
-          group.position.x +
-          CONTAINER_PADDING +
-          index * (wireframe.dimensions.width + CONTAINER_PADDING),
+        x: offsetX,
+        // group.position.x +
+        // CONTAINER_PADDING +
+        // index * (wireframe.dimensions.width + CONTAINER_PADDING),
         y: group.position.y + CONTAINER_PADDING,
         props: {
           wireframeId: wireframe.id,

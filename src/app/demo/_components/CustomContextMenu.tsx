@@ -16,11 +16,6 @@ export function CustomContextMenu(props: TLUiContextMenuProps) {
 
   useEffect(() => {
     editor.on("event", (e) => {
-      // console.log("e", e.name);
-      // console.log(
-      //   "editor.getOnlySelectedShape()",
-      //   editor.getOnlySelectedShape()
-      // );
       if (e.name === "right_click" && editor.getOnlySelectedShape()) {
         if (!showCustomMenu) {
           setShowCustomMenu(true);

@@ -22,6 +22,7 @@ import {
 } from "tldraw";
 import { WIREFRAMES } from "../_constants/wireframes.constant";
 import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 const CONTAINER_PADDING = 24;
 
@@ -91,6 +92,24 @@ export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
     });
   }
 
+  handleAddNewElement = (side: "left" | "right") => {
+    const editor = this.editor;
+    if (!editor) return;
+
+    console.log("Handle Add New Element:", side);
+    // Uncomment and modify this once console.log is confirmed working
+    // editor.createShape({
+    //   type: "element",
+    //   props: {
+    //     wireframeId: WIREFRAMES[0].id,
+    //     title: "New Element",
+    //     type: "desktop",
+    //     dimensions: WIREFRAMES[0].dimensions,
+    //     _html: WIREFRAMES[0]._html
+    //   }
+    // });
+  };
+
   override component(shape: ContainerShape) {
     return (
       <HTMLContainer>
@@ -117,6 +136,60 @@ export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
             }}
           >
             {shape.props.title}
+          </div>
+
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: -60,
+              margin: 12,
+              zIndex: 100,
+              pointerEvents: "all",
+            }}
+          >
+            <Button
+              className="rounded-full size-8 bg-blue-600 hover:bg-blue-700 cursor-pointer"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                this.handleAddNewElement("left");
+              }}
+              style={{
+                pointerEvents: "all",
+                cursor: "pointer",
+                zIndex: 999999,
+              }}
+            >
+              <Plus className="size-4 text-white" />
+            </Button>
+          </div>
+
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              right: -60,
+              margin: 12,
+              zIndex: 100,
+              pointerEvents: "all",
+            }}
+          >
+            <Button
+              className="rounded-full size-8 bg-blue-600 hover:bg-blue-700 cursor-pointer"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                this.handleAddNewElement("right");
+              }}
+              style={{
+                pointerEvents: "all",
+                cursor: "pointer",
+                zIndex: 999999,
+              }}
+            >
+              <Plus className="size-4 text-white" />
+            </Button>
           </div>
         </div>
       </HTMLContainer>

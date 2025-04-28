@@ -23,6 +23,8 @@ import {
 import { WIREFRAMES } from "../_constants/wireframes.constant";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { createNewWireframe } from "../_constants/wireframes.constant";
+import { updateWireframeContainer } from "../store/canvasSlice";
 
 const CONTAINER_PADDING = 24;
 
@@ -92,22 +94,78 @@ export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
     });
   }
 
-  handleAddNewElement = (side: "left" | "right") => {
+  handleAddNewElement = (
+    side: "left" | "right",
+    containerShape: ContainerShape
+  ) => {
     const editor = this.editor;
     if (!editor) return;
 
-    console.log("Handle Add New Element:", side);
-    // Uncomment and modify this once console.log is confirmed working
-    // editor.createShape({
-    //   type: "element",
-    //   props: {
-    //     wireframeId: WIREFRAMES[0].id,
-    //     title: "New Element",
-    //     type: "desktop",
-    //     dimensions: WIREFRAMES[0].dimensions,
-    //     _html: WIREFRAMES[0]._html
-    //   }
-    // });
+    const wireframe = createNewWireframe("desktop");
+
+    // Get all existing bindings for this container
+    const existingBindings = editor
+      .getBindingsFromShape<LayoutBinding>(containerShape, "layout")
+      .sort((a, b) => (a.props.index > b.props.index ? 1 : -1));
+
+    // Calculate position for new element
+    const elementX = containerShape.x + CONTAINER_PADDING;
+    const elementY = containerShape.y + CONTAINER_PADDING;
+
+    // Create new element shape
+    const elementId = ("shape:" + wireframe.id) as TLShapeId;
+    const element = editor.createShape<ElementShape>({
+      id: elementId,
+      type: "element",
+      x: elementX,
+      y: elementY,
+      props: {
+        wireframeId: wireframe.id,
+        title: wireframe.title,
+        type: wireframe.type,
+        dimensions: wireframe.dimensions,
+        _html: wireframe._html,
+      },
+    });
+
+    // Determine the index for the new binding
+    let index: IndexKey;
+    if (side === "left") {
+      // Add to start (leftmost)
+      const firstBinding = existingBindings[0];
+      index = firstBinding
+        ? getIndexBetween(undefined, firstBinding.props.index)
+        : ("a1" as IndexKey);
+    } else {
+      // Add to end (rightmost)
+      const lastBinding = existingBindings[existingBindings.length - 1];
+      index = lastBinding
+        ? getIndexBetween(lastBinding.props.index, undefined)
+        : ("a1" as IndexKey);
+    }
+
+    // Create binding between container and new element
+    editor.createBinding<LayoutBinding>({
+      id: createBindingId(),
+      type: "layout",
+      fromId: containerShape.id as unknown as TLShapeId,
+      toId: elementId as unknown as TLShapeId,
+      props: {
+        index,
+        placeholder: false,
+      },
+    });
+
+    // Update Redux store
+    const store = (window as any).store;
+    if (store) {
+      store.dispatch(
+        updateWireframeContainer({
+          wireframeId: wireframe.id,
+          newGroupId: containerShape.props.groupId,
+        })
+      );
+    }
   };
 
   override component(shape: ContainerShape) {
@@ -153,7 +211,7 @@ export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
-                this.handleAddNewElement("left");
+                this.handleAddNewElement("left", shape);
               }}
               style={{
                 pointerEvents: "all",
@@ -180,7 +238,7 @@ export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
               onPointerDown={(e) => e.stopPropagation()}
               onClick={(e) => {
                 e.stopPropagation();
-                this.handleAddNewElement("right");
+                this.handleAddNewElement("right", shape);
               }}
               style={{
                 pointerEvents: "all",
@@ -188,7 +246,7 @@ export class ContainerShapeUtil extends ShapeUtil<ContainerShape> {
                 zIndex: 999999,
               }}
             >
-              <Plus className="size-4 text-white" />
+              <Plus className="size-8 text-white" />
             </Button>
           </div>
         </div>

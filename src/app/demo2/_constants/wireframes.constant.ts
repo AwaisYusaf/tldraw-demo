@@ -1,5 +1,6 @@
 import { DESKTOP_VIEW_HTML, MOBILE_VIEW_HTML } from "./iframe.constant";
 import type { TGroup, TWireframe } from "./types";
+import { v4 as uuidv4 } from "uuid";
 
 export const PAGE_GROUPS: TGroup[] = [
   {
@@ -128,4 +129,28 @@ export const WIREFRAMES: TWireframe[] = [
 
 export const getWireframe = (id: string) => {
   return WIREFRAMES.find((wireframe) => wireframe.id === id);
+};
+
+export const createNewWireframe = (
+  type: "desktop" | "mobile" = "desktop"
+): TWireframe => {
+  const wireframe: TWireframe = {
+    id: uuidv4(),
+    title: "New Wireframe",
+    image: "/wireframe3.png",
+    dimensions:
+      type === "desktop"
+        ? {
+            width: 1024,
+            height: 840,
+          }
+        : {
+            width: 840,
+            height: 1080,
+          },
+    type,
+    _html: type === "desktop" ? DESKTOP_VIEW_HTML : MOBILE_VIEW_HTML,
+  };
+
+  return wireframe;
 };

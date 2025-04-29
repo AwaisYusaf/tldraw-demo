@@ -8,6 +8,8 @@ import {
   useEditor,
 } from "tldraw";
 import "tldraw/tldraw.css";
+import { createContainerForElements } from "@/app/demo3/_helpers/tldraw.helper";
+import { ElementShape } from "@/app/demo3/_helpers/tldraw.shapes";
 
 // Save, Show Code, Prompt History, Change Font, Export, Move, Delete forever
 export function CustomContextMenu(props: TLUiContextMenuProps) {
@@ -16,7 +18,7 @@ export function CustomContextMenu(props: TLUiContextMenuProps) {
 
   useEffect(() => {
     editor.on("event", (e) => {
-      if (e.name === "right_click" && editor.getOnlySelectedShape()) {
+      if (e.name === "right_click" && editor.getSelectedShapes().length > 0) {
         if (!showCustomMenu) {
           setShowCustomMenu(true);
         }
@@ -26,11 +28,29 @@ export function CustomContextMenu(props: TLUiContextMenuProps) {
     });
   }, [editor]);
 
+  const handleGroupWireframes = () => {
+    const selectedShapes = editor.getSelectedShapes();
+    const selectedElements = selectedShapes.filter(
+      (shape): shape is ElementShape => shape.type === "element"
+    );
+
+    if (selectedElements.length > 0) {
+      createContainerForElements(editor, selectedElements);
+    }
+  };
+
   return (
     <DefaultContextMenu {...props}>
       {showCustomMenu ? (
         <>
           <TldrawUiMenuGroup id="actions">
+            <TldrawUiMenuItem
+              id="group-wireframes"
+              label="Group Wireframes"
+              icon="group"
+              readonlyOk
+              onSelect={handleGroupWireframes}
+            />
             <TldrawUiMenuItem
               id="save"
               label="Save"

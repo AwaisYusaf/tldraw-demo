@@ -9,7 +9,6 @@ export function loadElementsOnMount(
   groups: Group[],
   wireframes: Wireframe[]
 ) {
-  // Remove all container and element shapes and their bindings
   editor.getCurrentPageShapeIds().forEach((id) => {
     const shape = editor.getShape(id);
     if (shape && (shape?.type === "container" || shape?.type === "element")) {
@@ -49,7 +48,6 @@ export function loadElementsOnMount(
 
     groupWireframes.forEach((wireframe, index) => {
       const offsetX = index * wireframe.dimensions.width + CONTAINER_PADDING;
-      // console.log("Offset X:", offsetX);
 
       const elementId = ("shape:" + wireframe.id) as TLShapeId;
       const element = editor.createShape<ElementShape>({

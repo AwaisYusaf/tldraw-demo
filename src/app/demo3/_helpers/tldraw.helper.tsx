@@ -9,7 +9,6 @@ export function loadElementsOnMount(
   groups: Group[],
   wireframes: Wireframe[]
 ) {
-  // Remove all container and element shapes and their bindings
   editor.getCurrentPageShapeIds().forEach((id) => {
     const shape = editor.getShape(id);
     if (shape && (shape?.type === "container" || shape?.type === "element")) {
@@ -17,70 +16,80 @@ export function loadElementsOnMount(
     }
   });
 
-  groups.forEach((group) => {
-    const groupWireframes = group.wireframeIds
-      .map((id) => wireframes.find((w) => w.id === id))
-      .filter((w): w is Wireframe => w !== undefined);
-
-    const containerWidth =
-      CONTAINER_PADDING +
-      groupWireframes.reduce((acc, wireframe) => {
-        return acc + wireframe.dimensions.width + CONTAINER_PADDING;
-      }, 0);
-
-    const maxHeight = Math.max(
-      ...groupWireframes.map((w) => w.dimensions.height)
-    );
-    const containerHeight = maxHeight + CONTAINER_PADDING * 2;
-
-    const containerId = ("shape:" + group.id) as TLShapeId;
-    const container = editor.createShape<ContainerShape>({
-      id: containerId,
-      type: "container",
-      x: group.position.x,
-      y: group.position.y,
+  let prevX = 0;
+  wireframes.forEach((wireframe) => {
+    const elementId = ("shape:" + wireframe.id) as TLShapeId;
+    editor.createShape<ElementShape>({
+      id: elementId,
+      type: "element",
+      x: prevX,
+      y: wireframe.position?.y || 100,
       props: {
-        width: containerWidth,
-        height: containerHeight,
-        groupId: group.id,
-        title: group.title,
+        wireframeId: wireframe.id,
+        title: wireframe.title,
+        type: wireframe.type,
+        dimensions: wireframe.dimensions,
+        _html: wireframe._html,
       },
     });
-
-    groupWireframes.forEach((wireframe, index) => {
-      const offsetX = index * wireframe.dimensions.width + CONTAINER_PADDING;
-      // console.log("Offset X:", offsetX);
-
-      const elementId = ("shape:" + wireframe.id) as TLShapeId;
-      const element = editor.createShape<ElementShape>({
-        id: elementId,
-        type: "element",
-        x: offsetX,
-        // group.position.x +
-        // CONTAINER_PADDING +
-        // index * (wireframe.dimensions.width + CONTAINER_PADDING),
-        y: group.position.y + CONTAINER_PADDING,
-        props: {
-          wireframeId: wireframe.id,
-          title: wireframe.title,
-          type: wireframe.type,
-          dimensions: wireframe.dimensions,
-          _html: wireframe._html,
-        },
-      });
-
-      editor.createBinding<LayoutBinding>({
-        id: createBindingId(),
-        type: "layout",
-        fromId: containerId as unknown as TLShapeId,
-        toId: elementId as unknown as TLShapeId,
-        props: {
-          index: `a${index}` as IndexKey,
-          placeholder: false,
-        },
-      });
-    });
+    prevX += wireframe.dimensions.width + CONTAINER_PADDING;
   });
 
   (window as any).editor = editor;
+}
+
+export function createContainerForElements(
+  editor: Editor,
+  selectedElements: ElementShape[]
+) {
+  if (!selectedElements.length) return;
+
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+
+  selectedElements.forEach((element) => {
+    minX = Math.min(minX, element.x);
+    minY = Math.min(minY, element.y);
+    maxX = Math.max(maxX, element.x + element.props.dimensions.width);
+    maxY = Math.max(maxY, element.y + element.props.dimensions.height);
+  });
+
+  const containerWidth = maxX - minX + CONTAINER_PADDING * 2;
+  const containerHeight = maxY - minY + CONTAINER_PADDING * 2;
+
+  const containerId = ("shape:container_" + Date.now()) as TLShapeId;
+  const container = editor.createShape<ContainerShape>({
+    id: containerId,
+    type: "container",
+    x: minX - CONTAINER_PADDING,
+    y: minY - CONTAINER_PADDING,
+    props: {
+      width: containerWidth,
+      height: containerHeight,
+      groupId: "group_" + Date.now(),
+      title: "New Group",
+    },
+  });
+
+  selectedElements.forEach((element, index) => {
+    editor.createBinding<LayoutBinding>({
+      id: createBindingId(),
+      type: "layout",
+      fromId: containerId as unknown as TLShapeId,
+      toId: element.id as unknown as TLShapeId,
+      props: {
+        index: `a${index}` as IndexKey,
+        placeholder: false,
+      },
+    });
+  });
+
+  editor.sendToBack([containerId]);
+  editor.bringToFront(
+    selectedElements.map((el) => el.id as unknown as TLShapeId)
+  );
+
+  return container;
 }

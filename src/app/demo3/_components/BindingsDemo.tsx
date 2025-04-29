@@ -3,7 +3,7 @@ import { Editor, TLComponents, Tldraw } from "tldraw";
 import "tldraw/tldraw.css";
 import WireframeContextToolbar from "./WireframeContextToolbar";
 import { CustomContextMenu } from "./CustomContextMenu";
-import { loadElementsOnMount } from "@/app/demo2/_helpers/tldraw.helper";
+import { loadElementsOnMount } from "@/app/demo3/_helpers/tldraw.helper";
 import {
   ContainerShape,
   ContainerShapeUtil,
